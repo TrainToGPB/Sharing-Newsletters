@@ -32,18 +32,37 @@ JSON 으로 후보 글 목록이 나온다. 각 항목 필드: `title`, `date`, 
 
 `count == 0` 이면 사용자에게 "범위 안에 글이 없다" 알리고 중단.
 
-### 2. 본문 보강 (선택)
+### 2. 본문 보강 (선택, subagent 위임 권장)
 
-`summary` 만으로 부족하면 각 글의 첫 1~2 단락을 `Read` 로 직접 읽어 추가 맥락 확보. 디제스트 길이가 길어지지 않게 글당 2~3 줄로 압축.
+`summary` 만으로 부족하면 각 글의 첫 1~2 단락을 직접 읽어 맥락 확보. 글이 5개 이상이면 메인이 다 읽지 말고 subagent 한 번에 위임.
+
+#### Subagent 프롬프트 템플릿
+
+```
+역할: digest 본문 보강용 글별 압축 코멘트 생성.
+
+입력:
+- 글 목록 (JSON): list_posts.py 출력
+- 각 글의 abstract 경로: docs/<topic>/<slug>/index.md
+
+출력 (한 메시지에 텍스트로 반환):
+- 글 항목별 한 줄 (최대 2줄) 의 보강 코멘트.
+- 형식: "<slug>: <한 줄 코멘트>" 식으로 plain text.
+
+스타일: 한국어, 이모지 없음. 글당 30~60자.
+```
+
+메인 에이전트는 받은 코멘트를 디제스트 본문 항목 옆에 박아 넣음. 글이 적으면 (3~4개) 메인이 직접 읽어도 무방.
 
 ### 3. 디제스트 작성
 
-frontmatter.
+frontmatter. `author` 는 디제스트를 만든 사람 — `git config user.name`.
 
 ```markdown
 ---
 title: 2026-W19 주간 정리
 date: 2026-05-10
+author: <git user.name>
 tags: [digest]
 summary: 이번 주 AI 기술 흐름 한 문장 요약
 ---
@@ -63,11 +82,13 @@ summary: 이번 주 AI 기술 흐름 한 문장 요약
 
 ### 4. 파일 경로
 
-- 주간: `docs/digest/<YYYY>-W<WW>.md`. `<WW>` 는 ISO 주 번호 두 자리 (예: `2026-W19.md`).
-- 월간: `docs/digest/<YYYY>-<MM>.md`. (예: `2026-05.md`).
-- `from`/`to` 직접 지정한 커스텀 범위: `docs/digest/<YYYY-MM-DD>--<YYYY-MM-DD>.md`.
+다른 글과 동일하게 폴더-스타일.
 
-이미 같은 파일이 존재하면 사용자에게 덮어쓸지 추가할지 묻기. 추가면 새로 들어온 글만 머지.
+- 주간: `docs/digest/<YYYY>-W<WW>/index.md`. `<WW>` 는 ISO 주 번호 두 자리 (예: `2026-W19/index.md`).
+- 월간: `docs/digest/<YYYY>-<MM>/index.md` (예: `2026-05/index.md`).
+- `from`/`to` 직접 지정한 커스텀 범위: `docs/digest/<YYYY-MM-DD>--<YYYY-MM-DD>/index.md`.
+
+이미 같은 폴더가 존재하면 사용자에게 덮어쓸지 추가할지 묻기. 추가면 새로 들어온 글만 머지.
 
 ### 5. 마무리
 

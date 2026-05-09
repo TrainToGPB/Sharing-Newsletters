@@ -111,5 +111,5 @@ python scripts/update_index.py
 ## 예시 호출
 
 - `/auto-blog https://arxiv.org/abs/2501.12345` → `format=short`, 본문에 맞게 토픽 자동 선택.
-- `/auto-blog ./paper.pdf format=deep topic=papers` → 그림 포함 상세 정리.
+- `/auto-blog ./paper.pdf format=deep` → PDF 그림 포함 상세 정리, 토픽 자동 추정.
 - 카드 뉴스가 필요하면 `/card-news <source>` 를 별도로 호출.

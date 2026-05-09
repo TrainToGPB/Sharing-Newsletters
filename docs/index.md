@@ -24,7 +24,6 @@ push 한 번으로 글이 올라가고, 정리는 Claude Code 가 도와준다. 
 - [추론](inference/) — 서빙·경량화·양자화 등 추론 기술
 - [벤치마크](benchmark/) — 평가, 리더보드, 비교
 - [인프라](infra/) — 클러스터·MLOps·비용
-- [논문](papers/) — arxiv 정리
 - [도구](tools/) — IDE, CLI, 개발 도구
 - [모음](digest/) — 주간·월간 디제스트
 

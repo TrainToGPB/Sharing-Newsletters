@@ -45,13 +45,26 @@ def derive_range(period: str, ending: dt.date | None) -> tuple[dt.date, dt.date]
     return start, end
 
 
+def post_url(rel: Path) -> str:
+    """Folder layout: docs/<topic>/<slug>/index.md -> <topic>/<slug>/
+    Flat (legacy):     docs/<topic>/<slug>.md       -> <topic>/<slug>/
+    """
+    if rel.name == "index.md":
+        return str(rel.parent).replace("\\", "/") + "/"
+    return str(rel.with_suffix("")).replace("\\", "/") + "/"
+
+
 def collect(start: dt.date, end: dt.date, topic: str | None) -> list[dict]:
     posts: list[dict] = []
     for p in DOCS.rglob("*.md"):
-        if p.name == "index.md":
-            continue
         rel = p.relative_to(DOCS)
         if not rel.parts:
+            continue
+        # Same depth rule as update_index.py: skip homepage/topic landings
+        # and anything under a format subfolder.
+        if rel.name == "index.md" and len(rel.parts) <= 2:
+            continue
+        if len(rel.parts) >= 4:
             continue
         first = rel.parts[0]
         if first == DIGEST_FOLDER:
@@ -72,15 +85,15 @@ def collect(start: dt.date, end: dt.date, topic: str | None) -> list[dict]:
             continue
         if not (start <= pd <= end):
             continue
-        url = str(rel.with_suffix("")).replace("\\", "/") + "/"
         posts.append({
             "title": post.metadata.get("title", p.stem),
             "date": str(d),
+            "author": post.metadata.get("author", ""),
             "tags": post.metadata.get("tags") or [],
             "summary": post.metadata.get("summary", ""),
             "source": post.metadata.get("source", ""),
             "topic": first,
-            "url": url,
+            "url": post_url(rel),
             "path": str(rel).replace("\\", "/"),
         })
     posts.sort(key=lambda x: x["date"], reverse=True)

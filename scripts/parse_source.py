@@ -6,15 +6,18 @@ Usage:
 
 Options:
     --out-md <path>           Write markdown to this file (default: stdout).
-    --assets-dir <path>       Directory to save extracted PDF figures.
+    --assets-dir <path>       Directory to save extracted figures.
+                              For URLs: inline content images are downloaded here
+                              and refs in the markdown are rewritten to local paths.
+                              For PDFs: PyMuPDF dumps embedded figures here.
     --image-prefix <str>      Markdown image href prefix (default: assets-dir name).
 
 Source types:
-    - http(s) URL  -> fetched, cleaned with trafilatura.
+    - http(s) URL  -> fetched, cleaned with trafilatura. Inline images get
+                      downloaded to assets-dir when given.
                       arxiv.org/abs/<id> is rewritten to arxiv.org/html/<id>.
-    - .pdf         -> Docling for text. PyMuPDF for image extraction
-                      when --assets-dir is given. Extracted figures are listed
-                      in a "## Figures" block at the end of the output.
+    - .pdf         -> Docling for text. PyMuPDF for image extraction.
+                      Extracted figures listed in a "## Figures" block at end.
 
 Other file types (.md, .txt) are intentionally not supported. Paste their
 content into a post manually if you need to.
@@ -26,7 +29,22 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
+
+
+# Common content-type to extension mapping for downloaded images.
+_CT_TO_EXT = {
+    "image/png": ".png",
+    "image/jpeg": ".jpg",
+    "image/jpg": ".jpg",
+    "image/gif": ".gif",
+    "image/webp": ".webp",
+    "image/svg+xml": ".svg",
+    "image/avif": ".avif",
+}
+
+# Markdown image syntax (ungreedy alt, simple url — no nested parens).
+_IMG_PATTERN = re.compile(r"!\[([^\]]*)\]\(([^)\s]+)(?:\s+\"([^\"]*)\")?\)")
 
 
 def is_url(s: str) -> bool:
@@ -44,7 +62,55 @@ def rewrite_arxiv(url: str) -> str:
     return url
 
 
-def parse_url(url: str) -> str:
+def _download_inline_images(
+    md: str,
+    base_url: str,
+    assets_dir: Path,
+    image_prefix: str,
+    min_bytes: int = 4096,
+) -> str:
+    """Download every ![](...) image in `md` to `assets_dir`, rewrite refs.
+
+    Skips data: URIs and very small responses (likely icons/sprites).
+    Leaves the original ref untouched on download failure.
+    """
+    import httpx
+
+    assets_dir.mkdir(parents=True, exist_ok=True)
+    counter = {"i": 0}
+    headers = {"User-Agent": "Mozilla/5.0 SharingNewsletters/1.0"}
+
+    def _replace(match: "re.Match[str]") -> str:
+        alt = match.group(1)
+        raw = match.group(2).strip()
+        title = match.group(3) or ""
+
+        if raw.startswith("data:"):
+            return match.group(0)
+
+        url = raw if raw.startswith(("http://", "https://")) else urljoin(base_url, raw)
+        try:
+            r = httpx.get(url, timeout=30.0, follow_redirects=True, headers=headers)
+            if r.status_code != 200 or len(r.content) < min_bytes:
+                return match.group(0)
+            ct = r.headers.get("content-type", "").split(";")[0].strip().lower()
+            ext = _CT_TO_EXT.get(ct) or Path(urlparse(url).path).suffix.lower() or ".png"
+            counter["i"] += 1
+            fname = f"fig-{counter['i']}{ext}"
+            (assets_dir / fname).write_bytes(r.content)
+            href = f"{image_prefix.rstrip('/')}/{fname}" if image_prefix else fname
+        except Exception as exc:
+            print(f"image fetch failed: {url}: {exc}", file=sys.stderr)
+            return match.group(0)
+
+        if title:
+            return f'![{alt}]({href} "{title}")'
+        return f"![{alt}]({href})"
+
+    return _IMG_PATTERN.sub(_replace, md)
+
+
+def parse_url(url: str, assets_dir: Path | None = None, image_prefix: str = "") -> str:
     import httpx
     try:
         import trafilatura
@@ -56,6 +122,7 @@ def parse_url(url: str) -> str:
     headers = {"User-Agent": "Mozilla/5.0 SharingNewsletters/1.0"}
     r = httpx.get(url, follow_redirects=True, timeout=30.0, headers=headers)
     r.raise_for_status()
+    final_url = str(r.url)
     extracted = trafilatura.extract(
         r.text,
         output_format="markdown",
@@ -64,15 +131,17 @@ def parse_url(url: str) -> str:
         include_tables=True,
         with_metadata=False,
     )
-    if extracted:
-        return extracted
+    if not extracted:
+        try:
+            from bs4 import BeautifulSoup
+        except ImportError:
+            return r.text
+        soup = BeautifulSoup(r.text, "html.parser")
+        return soup.get_text("\n").strip()
 
-    try:
-        from bs4 import BeautifulSoup
-    except ImportError:
-        return r.text
-    soup = BeautifulSoup(r.text, "html.parser")
-    return soup.get_text("\n").strip()
+    if assets_dir is not None:
+        extracted = _download_inline_images(extracted, final_url, assets_dir, image_prefix)
+    return extracted
 
 
 def docling_text(path: Path) -> str:
@@ -149,7 +218,7 @@ def main() -> int:
 
     src = args.source
     if is_url(src):
-        md = parse_url(src)
+        md = parse_url(src, assets_dir=args.assets_dir, image_prefix=image_prefix)
     else:
         p = Path(src).expanduser().resolve()
         if not p.exists():

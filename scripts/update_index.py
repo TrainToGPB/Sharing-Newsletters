@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Refresh the latest-posts list in docs/index.md.
+"""Refresh the latest-posts list (and optional card-news preview) in docs/index.md.
 
-Scans docs/ for .md files with frontmatter, sorts by date descending, and
-rewrites the block between <!-- LATEST_START --> and <!-- LATEST_END --> in
-docs/index.md.
+Scans docs/ for post landings, sorts by date descending, then:
+1. Rewrites the block between <!-- LATEST_START --> and <!-- LATEST_END --> with
+   a text-style list of recent posts.
+2. If <!-- CARDS_START --> / <!-- CARDS_END --> markers also exist, rewrites that
+   block with a Material grid-cards gallery of recent posts that have a
+   cards/ subfolder. Skipped silently if the markers aren't present.
 
 Run from repo root:  python scripts/update_index.py
 """
@@ -24,16 +27,44 @@ except ImportError:
 REPO = Path(__file__).resolve().parent.parent
 DOCS = REPO / "docs"
 INDEX = DOCS / "index.md"
-MARK_START = "<!-- LATEST_START -->"
-MARK_END = "<!-- LATEST_END -->"
+
+LATEST_START = "<!-- LATEST_START -->"
+LATEST_END = "<!-- LATEST_END -->"
+CARDS_START = "<!-- CARDS_START -->"
+CARDS_END = "<!-- CARDS_END -->"
+
 LIMIT = 10
+LIMIT_CARDS = 6
 EMPTY_TEXT = "아직 글이 없다. `/share-news <URL>` 으로 첫 글을 추가해보자."
+EMPTY_CARDS_TEXT = "아직 카드 뉴스가 없다. `/card-news <source>` 로 첫 카드를 만들어보자."
+
+
+def post_url(rel: Path) -> str:
+    """Map a post path under docs/ to its site URL.
+
+    Folder layout:  docs/<topic>/<slug>/index.md  -> <topic>/<slug>/
+    Flat (legacy):  docs/<topic>/<slug>.md        -> <topic>/<slug>/
+    """
+    if rel.name == "index.md":
+        return str(rel.parent).replace("\\", "/") + "/"
+    return str(rel.with_suffix("")).replace("\\", "/") + "/"
 
 
 def collect_posts() -> list[dict]:
+    """Latest list shows post landing pages (or single-format posts).
+    Version subpages (depth-4 index.md under <slug>/<format>/index.md) are
+    intentionally skipped — the landing represents the post for the index.
+    """
     posts = []
     for p in DOCS.rglob("*.md"):
-        if p.name == "index.md":
+        rel = p.relative_to(DOCS)
+        # Skip homepage / topic landing.
+        if rel.name == "index.md" and len(rel.parts) <= 2:
+            continue
+        # Skip everything under a format subfolder — version subpages, deep
+        # series landings, deep series parts, etc. The slug-level landing
+        # (depth-3 index.md) represents the post in the latest list.
+        if len(rel.parts) >= 4:
             continue
         try:
             post = frontmatter.load(p)
@@ -43,19 +74,25 @@ def collect_posts() -> list[dict]:
         meta = post.metadata
         if not meta.get("date"):
             continue
-        rel = p.relative_to(DOCS).with_suffix("")
+        # has_cards: post folder has cards/index.md and cards/card-1.png.
+        post_dir = p.parent if rel.name == "index.md" else p.with_suffix("")
+        cards_index = post_dir / "cards" / "index.md"
+        card_thumb = post_dir / "cards" / "card-1.png"
+        has_cards = cards_index.is_file() and card_thumb.is_file()
         posts.append({
             "title": meta.get("title", p.stem),
             "date": str(meta["date"]),
+            "author": meta.get("author", ""),
             "summary": meta.get("summary", ""),
             "tags": meta.get("tags") or [],
-            "url": str(rel).replace("\\", "/") + "/",
+            "url": post_url(rel),
+            "has_cards": has_cards,
         })
     posts.sort(key=lambda x: x["date"], reverse=True)
     return posts
 
 
-def render(posts: list[dict]) -> str:
+def render_latest(posts: list[dict]) -> str:
     if not posts:
         return EMPTY_TEXT
     lines = []
@@ -63,8 +100,11 @@ def render(posts: list[dict]) -> str:
         title = p["title"]
         url = p["url"]
         summary = p["summary"]
+        author = p.get("author", "")
         tags = " ".join(f"`{t}`" for t in p["tags"])
         line = f"- **{p['date']}** [{title}]({url})"
+        if author:
+            line += f" · _{author}_"
         if summary:
             line += f" — {summary}"
         if tags:
@@ -73,25 +113,59 @@ def render(posts: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def render_cards(posts: list[dict]) -> str:
+    cards_posts = [p for p in posts if p.get("has_cards")]
+    if not cards_posts:
+        return EMPTY_CARDS_TEXT
+    lines = ['<div class="grid cards" markdown>', ""]
+    for p in cards_posts[:LIMIT_CARDS]:
+        thumb = f"{p['url']}cards/card-1.png"
+        cards_link = f"{p['url']}cards/"
+        title = p["title"]
+        author = p.get("author", "")
+        date = p["date"]
+        lines.append(f"- [![]({thumb})]({cards_link})")
+        lines.append("")
+        meta_line = f"  **[{title}]({p['url']})**"
+        meta_line += f" · {date}"
+        if author:
+            meta_line += f" · _{author}_"
+        lines.append(meta_line)
+        lines.append("")
+    lines.append("</div>")
+    return "\n".join(lines)
+
+
+def _replace_block(text: str, start: str, end: str, body: str) -> str:
+    pattern = re.compile(
+        rf"({re.escape(start)}).*?({re.escape(end)})",
+        flags=re.DOTALL,
+    )
+    return pattern.sub(rf"\1\n{body}\n\2", text, count=1)
+
+
 def main() -> int:
     if not INDEX.exists():
         print(f"missing {INDEX}", file=sys.stderr)
         return 1
     text = INDEX.read_text(encoding="utf-8")
-    if MARK_START not in text or MARK_END not in text:
-        print(f"index markers not found in {INDEX}", file=sys.stderr)
+    if LATEST_START not in text or LATEST_END not in text:
+        print(f"latest markers not found in {INDEX}", file=sys.stderr)
         return 1
 
     posts = collect_posts()
-    block = render(posts)
-    pattern = re.compile(
-        rf"({re.escape(MARK_START)}).*?({re.escape(MARK_END)})",
-        flags=re.DOTALL,
-    )
-    new = pattern.sub(rf"\1\n{block}\n\2", text, count=1)
-    if new != text:
-        INDEX.write_text(new, encoding="utf-8")
-    print(f"updated {INDEX} with {min(len(posts), LIMIT)} posts")
+
+    new_text = _replace_block(text, LATEST_START, LATEST_END, render_latest(posts))
+    if CARDS_START in new_text and CARDS_END in new_text:
+        new_text = _replace_block(new_text, CARDS_START, CARDS_END, render_cards(posts))
+        cards_count = sum(1 for p in posts if p.get("has_cards"))
+        cards_msg = f", {min(cards_count, LIMIT_CARDS)} cards"
+    else:
+        cards_msg = ""
+
+    if new_text != text:
+        INDEX.write_text(new_text, encoding="utf-8")
+    print(f"updated {INDEX} with {min(len(posts), LIMIT)} posts{cards_msg}")
     return 0
 
 

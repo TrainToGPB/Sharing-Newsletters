@@ -13,17 +13,17 @@
 이 레포는 Claude Code 기반으로 자동 정리를 지원한다.
 
 ```text
-# 한 페이지 요약 (기본)
+# abstract 한 페이지 + details 시리즈 (기본 5편) 한 번에 생성
 /share-news https://arxiv.org/abs/2403.04132
 
-# 토픽별 상세 문서
-/share-news https://arxiv.org/abs/2403.04132 format=deep
+# 시리즈 편 수 조정
+/share-news https://arxiv.org/abs/2403.04132 parts=4
 
-# 카드 뉴스 (gpt-image-2 이미지 4~6장)
+# 카드 뉴스 (gpt-image-2 이미지 4~6장) — 별도 스킬, 같은 폴더에 cards/ 추가
 /card-news https://arxiv.org/abs/2403.04132 count=5
 
 # 토픽 폴더 명시 (기본은 자동 추정)
-/share-news ./paper.pdf format=deep topic=agents
+/share-news ./paper.pdf topic=agents
 ```
 
 지원 입력:
@@ -37,23 +37,45 @@
 
 원하면 파일을 직접 작성해도 된다.
 
-1. `docs/<topic>/<YYYY-MM-DD-slug>.md` 생성
-2. 아래 frontmatter 필수
-3. main에 push
+1. `docs/<topic>/<YYYY-MM-DD-slug>/index.md` 생성 (글마다 자기 폴더)
+2. 같이 올릴 이미지가 있으면 같은 폴더 안 `assets/` 에 두기
+3. 아래 frontmatter 필수
+4. main 에 push
 
 ```markdown
 ---
 title: 글 제목
 date: 2026-05-10
+author: TrainToGPB
 tags: [agents, mcp]
 source: https://원본-링크
 summary: 한 줄 요약
+format: short
 ---
 
 # 글 제목
 
 본문 ...
 ```
+
+한 번 호출에 *abstract* (한 페이지 요약) + *details* (시리즈) 가 같이 만들어진다. 카드 뉴스가 필요하면 별도 `/card-news` 호출로 같은 폴더에 추가.
+
+```text
+docs/agents/2026-05-10-foo/
+  index.md            # abstract — 한 페이지 요약 + details TOC + 출처
+  details/            # 시리즈
+    01-overview.md
+    02-architecture.md
+    03-results.md
+    ...
+  cards/              # 카드 뉴스 (/card-news 호출 시)
+    index.md
+  assets/             # 모든 포맷·시리즈 파트가 공유
+    fig-1.png
+    card-1.png
+```
+
+abstract 의 `## 자세히 보기` 블록은 `<!-- VERSIONS_START -->` / `<!-- VERSIONS_END -->` 마커 사이가 `scripts/refresh_landing.py` 에 의해 자동 갱신된다 — details 파트 목록과 cards 링크가 채워진다.
 
 작성 후 `python scripts/update_index.py` 를 돌리면 홈 페이지의 최신 글 목록이 갱신된다 (share-news 스킬은 이걸 자동으로 호출).
 
@@ -90,11 +112,12 @@ mkdocs.yml           사이트 설정
 ## 컨벤션
 
 - main 에 직접 push (PR 없음)
-- 글마다 frontmatter 의 `title / date / tags / source / summary` 필수
+- 모든 글은 자기 폴더 안에: `docs/<topic>/<YYYY-MM-DD-slug>/index.md`
+- frontmatter 의 `title / date / author / tags / source / summary` 필수. `author` 는 git 닉네임.
 - 이모지 사용 금지
 - 문장은 짧고 명확하게. 같은 정보면 한 문장으로
 - 외부 링크는 본문에 자연스럽게 포함하고 마지막에 `## 출처` 섹션으로 한 번 더 정리
-- 카드 뉴스 이미지는 `docs/<topic>/<slug>-assets/` 에 저장
+- 글에 딸린 이미지 (카드뉴스, PDF 그림) 는 같은 폴더 안 `assets/` 에 저장
 
 ## 로컬 미리보기
 

@@ -11,11 +11,56 @@
 
 ## 글 작성 규약
 
-- 모든 글 파일은 `docs/<topic>/<YYYY-MM-DD-slug>.md` 경로.
-- frontmatter 필수 필드: `title`, `date`, `tags`, `source`, `summary`. 누락 시 홈 페이지 인덱스가 깨진다.
-- 카드 뉴스 이미지는 `docs/<topic>/<slug>-assets/card-N.png`.
-- PDF 에서 추출한 그림은 같은 assets 폴더 안 `fig-N.png`.
-- 글이 추가·수정되면 `scripts/update_index.py` 를 돌려서 홈 페이지 최신 목록을 갱신.
+- 모든 글은 자기 폴더를 가진다: `docs/<topic>/<YYYY-MM-DD-slug>/`.
+- 글 폴더의 표준 레이아웃:
+
+```
+docs/<topic>/<slug>/
+  index.md            # abstract = 한 페이지 요약 + details TOC + 출처
+  details/            # 시리즈 (folder, 자체 index.md 없음)
+    01-<part>.md      # 각 편. 제목에 글 전체 제목 prefix 안 붙임, 번호도 안 붙임
+    02-<part>.md
+    ...
+  cards/              # /card-news 시 추가. 단독으로도 가능
+    index.md
+  assets/             # 모든 포맷·파트 공유
+    fig-N.png
+    card-N.png
+```
+
+- **abstract = slug 의 `index.md`**. 한 페이지 요약 + 핵심 포인트 + 짧은 본문 + 자세히 보기 (TOC) + 출처. 별도 short 페이지 없음.
+- **details = 시리즈**. 일반 논문 기준 **4~5편**, 편당 **1500~2500 단어**. 큰 멀티 파트 도큐먼트는 6~7편까지.
+- **details 파트 제목에 글 전체 제목이나 번호를 붙이지 말 것**. 예: `왜 또 다른 수학용 AI 인가` (O), `AI Co-Mathematician — 1. 왜 또 다른 수학용 AI 인가` (X). 번호는 파일명 prefix (`01-`, `02-` ...) 와 abstract TOC 의 자동 번호로 충분.
+- 문체: 간결하지만 정보 밀도 높게. 헤더로 토픽 분리, 병렬 항목은 불릿·표, 흐름 설명은 짧은 단락. 칼럼식 긴 산문 나열 X. 편집자 부연은 짧게 (원문이 안 다룬 맥락·실무 메모 정도). 사변·출처 없는 단정 X.
+- abstract 본문에서 그림 ref 는 `assets/fig-N.png`. details 파트와 cards 본문에서는 한 단계 위라 `../assets/fig-N.png`.
+
+### 자동 갱신
+
+- `python scripts/refresh_landing.py docs/<topic>/<slug>/` — abstract 의 `<!-- VERSIONS_START -->` / `<!-- VERSIONS_END -->` 마커 사이를 details 목록 + cards 링크로 자동 채움.
+- `python scripts/update_index.py` — 홈 페이지 (`docs/index.md`) LATEST 블록 갱신. 인덱스 노출은 글 폴더 1개 = 항목 1개. 시리즈 파트는 따로 노출 안 됨.
+
+### frontmatter
+
+- 필수 필드: `title`, `date`, `author`, `tags`, `source`, `summary`, `format`.
+- `format`: `abstract` (slug index.md) / `details` (details 파트) / `cards` (cards index.md) / `digest` (digest 파일).
+- details 파트는 `part: <N>` 도 같이.
+- `author` 는 `git config user.name`.
+- 슬러그에 포맷 접미사 (`-cards`, `-short` 등) 금지 — 같은 글이면 abstract / details / cards 가 같은 슬러그 공유.
+
+## 스킬 사용 시 subagent 적극 활용
+
+share-news / card-news / digest 모든 스킬은 컨텍스트 부담을 메인이 다 떠안지 않고 subagent 에 위임하도록 짜여 있다.
+
+- **share-news**: details 각 편 작성을 subagent 에 병렬 위임. 메인은 outline 만 잡고 결과 파일을 spot check.
+- **card-news**: 카드 narrative + 프롬프트 JSON 작성을 subagent 한 번 위임.
+- **digest**: 글이 5개 이상이면 글별 압축 코멘트 작성을 subagent 위임.
+
+원칙.
+
+- Agent tool, `subagent_type="general-purpose"`, foreground (결과 받아 다음 단계).
+- 입력 파일 경로·출력 파일 경로를 subagent 프롬프트에 명시. 트랜스크립트 다시 읽지 않음.
+- 독립적인 작업은 한 메시지에서 병렬 spawn (Agent tool call 여러 개).
+- subagent 출력이 가이드와 어긋나면 그 작업만 재spawn 또는 메인이 직접 미세 수정.
 
 ## 형식 가이드
 

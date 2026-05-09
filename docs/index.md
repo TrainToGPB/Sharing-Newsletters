@@ -10,10 +10,22 @@ hide:
 
 push 한 번으로 글이 올라가고, 정리는 Claude Code 가 도와준다. 작성 가이드는 레포 루트의 `README.md` 참조.
 
+## 최근 카드 뉴스
+
+<!-- CARDS_START -->
+<div class="grid cards" markdown>
+
+- [![](agents/2026-05-10-ai-co-mathematician/cards/card-1.png)](agents/2026-05-10-ai-co-mathematician/cards/)
+
+  **[AI Co-Mathematician — 수학자와 비동기로 협업하는 에이전트 워크벤치](agents/2026-05-10-ai-co-mathematician/)** · 2026-05-10 · _TrainToGPB_
+
+</div>
+<!-- CARDS_END -->
+
 ## 최신 글
 
 <!-- LATEST_START -->
-아직 글이 없다. `/share-news <URL>` 으로 첫 글을 추가해보자.
+- **2026-05-10** [AI Co-Mathematician — 수학자와 비동기로 협업하는 에이전트 워크벤치](agents/2026-05-10-ai-co-mathematician/) · _TrainToGPB_ — 수학자가 옆에 앉아 가설을 주고받는 비동기·상태 보존 에이전트 워크벤치. FrontierMath Tier 4에서 48%로 새 SOTA, 내부 100문항 벤치마크에서 Gemini Deep Think 대비 +17%p. `agents` `math` `frontiermath` `multi-agent`
 <!-- LATEST_END -->
 
 ## 토픽

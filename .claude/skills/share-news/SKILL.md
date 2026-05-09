@@ -1,9 +1,9 @@
 ---
-name: auto-blog
-description: Convert a URL or local PDF into a tech sharing post under docs/<topic>/, in either short summary or deep topic-doc format. Auto-detects topic from existing folders, generates a slug, extracts PDF figures, and refreshes the homepage latest list. For card-news image series use the separate /card-news skill. Use when the user invokes /auto-blog or asks to "정리해서 블로그 추가" with a source URL or PDF.
+name: share-news
+description: Convert a URL or local PDF into a tech sharing post under docs/<topic>/, in either short summary or deep topic-doc format. Auto-detects topic from existing folders, generates a slug, extracts PDF figures, and refreshes the homepage latest list. For card-news image series use the separate /card-news skill. Use when the user invokes /share-news or asks to "정리해서 블로그 추가" with a source URL or PDF.
 ---
 
-# auto-blog
+# share-news
 
 이 레포에 새 글을 자동으로 추가하는 스킬이다. URL 또는 로컬 PDF 를 받아서 정해진 폴더에 마크다운 파일과 (필요하면) PDF 그림을 추출해 올린다.
 
@@ -12,7 +12,7 @@ description: Convert a URL or local PDF into a tech sharing post under docs/<top
 ## 호출 형태
 
 ```text
-/auto-blog <source> [format=short|deep] [topic=<folder>]
+/share-news <source> [format=short|deep] [topic=<folder>]
 ```
 
 - `<source>` 는 URL 이거나 로컬 `.pdf` 경로 (다른 파일 형식은 미지원)
@@ -110,6 +110,6 @@ python scripts/update_index.py
 
 ## 예시 호출
 
-- `/auto-blog https://arxiv.org/abs/2501.12345` → `format=short`, 본문에 맞게 토픽 자동 선택.
-- `/auto-blog ./paper.pdf format=deep` → PDF 그림 포함 상세 정리, 토픽 자동 추정.
+- `/share-news https://arxiv.org/abs/2501.12345` → `format=short`, 본문에 맞게 토픽 자동 선택.
+- `/share-news ./paper.pdf format=deep` → PDF 그림 포함 상세 정리, 토픽 자동 추정.
 - 카드 뉴스가 필요하면 `/card-news <source>` 를 별도로 호출.

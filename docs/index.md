@@ -13,7 +13,7 @@ push 한 번으로 글이 올라가고, 정리는 Claude Code 가 도와준다. 
 ## 최신 글
 
 <!-- LATEST_START -->
-아직 글이 없다. `/auto-blog <URL>` 으로 첫 글을 추가해보자.
+아직 글이 없다. `/share-news <URL>` 으로 첫 글을 추가해보자.
 <!-- LATEST_END -->
 
 ## 토픽
@@ -30,7 +30,7 @@ push 한 번으로 글이 올라가고, 정리는 Claude Code 가 도와준다. 
 ## 기여하기
 
 1. 이 레포 클론
-2. Claude Code 에서 `/auto-blog <URL_or_PDF>` 실행
+2. Claude Code 에서 `/share-news <URL_or_PDF>` 실행
 3. 생성된 파일을 검토하고 main 으로 push
 
 수동 작성도 가능. 자세한 컨벤션은 `README.md` 와 `CLAUDE.md`.

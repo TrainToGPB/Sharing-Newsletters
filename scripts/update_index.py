@@ -27,7 +27,7 @@ INDEX = DOCS / "index.md"
 MARK_START = "<!-- LATEST_START -->"
 MARK_END = "<!-- LATEST_END -->"
 LIMIT = 10
-EMPTY_TEXT = "아직 글이 없다. `/auto-blog <URL>` 으로 첫 글을 추가해보자."
+EMPTY_TEXT = "아직 글이 없다. `/share-news <URL>` 으로 첫 글을 추가해보자."
 
 
 def collect_posts() -> list[dict]:

@@ -14,16 +14,16 @@
 
 ```text
 # 한 페이지 요약 (기본)
-/auto-blog https://arxiv.org/abs/2403.04132
+/share-news https://arxiv.org/abs/2403.04132
 
 # 토픽별 상세 문서
-/auto-blog https://arxiv.org/abs/2403.04132 format=deep
+/share-news https://arxiv.org/abs/2403.04132 format=deep
 
 # 카드 뉴스 (gpt-image-2 이미지 4~6장)
-/auto-blog https://arxiv.org/abs/2403.04132 format=cards
+/card-news https://arxiv.org/abs/2403.04132 count=5
 
 # 토픽 폴더 명시 (기본은 자동 추정)
-/auto-blog ./paper.pdf format=deep topic=agents
+/share-news ./paper.pdf format=deep topic=agents
 ```
 
 지원 입력:
@@ -31,7 +31,7 @@
 - URL (arxiv `abs/...` 는 자동으로 `html/...` 엔드포인트로 치환)
 - 로컬 PDF (Docling 으로 텍스트, PyMuPDF 로 그림 추출)
 
-`.md` / `.txt` 같은 로컬 텍스트 파일은 미지원. 직접 본문에 붙여넣어 수동 작성하면 된다. 자세한 동작은 `.claude/skills/auto-blog/SKILL.md` 참고.
+`.md` / `.txt` 같은 로컬 텍스트 파일은 미지원. 직접 본문에 붙여넣어 수동 작성하면 된다. 자세한 동작은 `.claude/skills/share-news/SKILL.md` 참고.
 
 ## 글 추가하기 (수동)
 
@@ -55,7 +55,7 @@ summary: 한 줄 요약
 본문 ...
 ```
 
-작성 후 `python scripts/update_index.py` 를 돌리면 홈 페이지의 최신 글 목록이 갱신된다 (auto-blog 스킬은 이걸 자동으로 호출).
+작성 후 `python scripts/update_index.py` 를 돌리면 홈 페이지의 최신 글 목록이 갱신된다 (share-news 스킬은 이걸 자동으로 호출).
 
 ## 모바일에서 작성하기
 
@@ -77,7 +77,7 @@ docs/
   infra/             클러스터, MLOps, 비용
   tools/             개발 도구, IDE, CLI
   digest/            주간·월간 모음
-.claude/skills/auto-blog/   자동 정리 스킬
+.claude/skills/share-news/  자동 정리 스킬
 .claude/skills/digest/      주간·월간 모음 스킬
 .claude/skills/card-news/   카드 뉴스 스킬
 scripts/             유틸리티 스크립트

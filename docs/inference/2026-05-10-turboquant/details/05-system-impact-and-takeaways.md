@@ -11,6 +11,8 @@ part: 5
 
 # 시스템 효과와 우리에게의 시사점
 
+> 원본: [research.google/blog/turboquant](https://research.google/blog/turboquant-redefining-ai-efficiency-with-extreme-compression/)
+
 이론은 앞 편들에서 정리했다. 마지막 편은 운영자 관점이다. 지금 LLM 을 서빙하거나 임베딩 인덱스를 굴리는 팀에게 TurboQuant 가 어디까지 와 있고, 어떤 조건에서 가져다 쓸 만한지 본다.
 
 ## KV 캐시 운영에서의 효과

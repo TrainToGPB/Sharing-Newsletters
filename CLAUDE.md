@@ -7,6 +7,7 @@
 - 모든 출력 문서는 한국어. 기술 용어는 영문 그대로 두는 것이 자연스러우면 그대로 사용.
 - 이모지 절대 사용 금지. 글머리 기호와 헤더만으로 구조를 잡을 것.
 - 문장은 짧게. 같은 정보를 두 번 말하지 말 것.
+- 수식은 반드시 마크다운 수식 포맷. 인라인은 `$x = y$`, 디스플레이는 빈 줄로 분리한 `$$ ... $$` 블록. 본문에 raw LaTeX 명령 (`\frac`, `\sum`, `\mathcal{O}` 등) 을 일반 텍스트로 흘리지 말 것. 변수·기호 한 글자 (`x`, `Q`) 도 `$x$` 로 감싼다. mkdocs 설정에 `pymdownx.arithmatex` + MathJax 가 이미 들어 있으므로 추가 설정 없이 렌더된다.
 - main 에 직접 push 하는 단일 브랜치 흐름. PR 만들지 말 것.
 
 ## 글 작성 규약
@@ -33,11 +34,20 @@ docs/<topic>/<slug>/
 - **details 파트 제목에 글 전체 제목이나 번호를 붙이지 말 것**. 예: `왜 또 다른 수학용 AI 인가` (O), `AI Co-Mathematician — 1. 왜 또 다른 수학용 AI 인가` (X). 번호는 파일명 prefix (`01-`, `02-` ...) 와 abstract TOC 의 자동 번호로 충분.
 - 문체: 간결하지만 정보 밀도 높게. 헤더로 토픽 분리, 병렬 항목은 불릿·표, 흐름 설명은 짧은 단락. 칼럼식 긴 산문 나열 X. 편집자 부연은 짧게 (원문이 안 다룬 맥락·실무 메모 정도). 사변·출처 없는 단정 X.
 - abstract 본문에서 그림 ref 는 `assets/fig-N.png`. details 파트와 cards 본문에서는 한 단계 위라 `../assets/fig-N.png`.
+- **모든 자료 페이지 (abstract / details / cards) 상단에 원본 출처 링크 배지 한 줄을 박는다**. H1 제목 바로 아래 빈 줄 하나, 그 다음 줄에 인용 블록으로 `> 원본: [<도메인 또는 짧은 라벨>](<URL>)`. 예: `> 원본: [arxiv.org/abs/2605.06651](https://arxiv.org/abs/2605.06651)`. 출처가 여러 개면 가장 핵심인 것 하나만 상단에 두고 나머지는 기존대로 본문 끝 `## 출처` 섹션. 모바일에서도 첫 화면에 노출돼 독자가 abstract 만 읽고 원문으로 바로 넘어갈 수 있다.
 
 ### 자동 갱신
 
 - `python scripts/refresh_landing.py docs/<topic>/<slug>/` — abstract 의 `<!-- VERSIONS_START -->` / `<!-- VERSIONS_END -->` 마커 사이를 details 목록 + cards 링크로 자동 채움.
-- `python scripts/update_index.py` — 홈 페이지 (`docs/index.md`) LATEST 블록 갱신. 인덱스 노출은 글 폴더 1개 = 항목 1개. 시리즈 파트는 따로 노출 안 됨.
+- `python scripts/update_index.py` — 홈 페이지 (`docs/index.md`) LATEST 블록 + 토픽 랜딩 (`docs/<topic>/index.md`) 의 `<!-- TOPIC_POSTS_START -->` / `<!-- TOPIC_POSTS_END -->` 블록을 함께 갱신. 인덱스 노출은 글 폴더 1개 = 항목 1개. 시리즈 파트는 따로 노출 안 됨.
+- 토픽 랜딩 페이지 (`docs/<topic>/index.md`) 는 그 토픽에 속한 글을 최신순 표 (날짜·제목·요약) 로 보여준다. 새 토픽을 만들 때 H1 + 한 줄 설명 다음에 다음 마커를 넣어두면 `update_index.py` 가 표를 채운다.
+
+  ```markdown
+  ## 글 목록
+
+  <!-- TOPIC_POSTS_START -->
+  <!-- TOPIC_POSTS_END -->
+  ```
 
 ### frontmatter
 

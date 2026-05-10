@@ -11,6 +11,8 @@ part: 4
 
 # TurboQuant — MSE 와 1-bit 잔차의 2단계 합성
 
+> 원본: [research.google/blog/turboquant](https://research.google/blog/turboquant-redefining-ai-efficiency-with-extreme-compression/)
+
 앞 편에서 두 흐름을 정리했다. QJL 은 부호 비트만 남겨 정규화 상수를 없애고 내적 비편향 추정량을 얻었고, PolarQuant 는 좌표를 극좌표로 풀어 각도 분포를 분석적으로 알아낸 뒤 데이터 비의존 코드북을 깔았다. 두 쪽 모두 "랜덤 회전으로 분포를 미리 안다" 는 출발점은 같지만, 한쪽은 1 비트의 편향 없는 거친 추정에, 다른 쪽은 다중 비트의 데이터 비의존 코드북에 무게를 둔다.
 
 TurboQuant 는 두 장점을 한 알고리즘에 합친다. 다중 비트 코드북으로 MSE 를 떨어뜨려 두고, 마지막 1 비트로 내적 편향을 제거한다. 결과는 임의 비트 예산 b 에서 학습 없이 닫힌형으로 동작하고, 이론적으로는 MSE 와 내적 둘 다에 대해 정보이론 하한의 작은 상수배 안에 들어온다.

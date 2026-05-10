@@ -10,6 +10,8 @@ format: abstract
 
 # AI Co-Mathematician — 수학자와 비동기로 협업하는 에이전트 워크벤치
 
+> 원본: [arxiv.org/abs/2605.06651](https://arxiv.org/abs/2605.06651)
+
 수학자가 풀려는 열린 문제를 옆에서 돕는 에이전트 워크벤치. 자율 실행이 아니라 사용자와 비동기로 협업하는 상태 보존 환경이 핵심이다. FrontierMath Tier 4에서 48%로 평가된 시스템 중 가장 높은 점수, 내부 100문항 벤치마크에선 Gemini Deep Think 대비 +17%p.
 
 ## 핵심 포인트

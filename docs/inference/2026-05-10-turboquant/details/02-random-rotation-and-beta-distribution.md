@@ -11,6 +11,8 @@ part: 2
 
 # 무작위 회전이 만드는 Beta 분포
 
+> 원본: [research.google/blog/turboquant](https://research.google/blog/turboquant-redefining-ai-efficiency-with-extreme-compression/)
+
 TurboQuant 가 데이터셋 캘리브레이션 없이 작동하는 이유는 한 줄로 요약된다. **입력 좌표 분포를 모르는 데이터 의존 분포에서, 분석적으로 알려진 분포로 옮겨놓는다**. 그 도구가 랜덤 직교 회전 (random orthogonal rotation) 이고, 옮겨진 분포가 (변환된) Beta 분포다. 이 편은 그 변환이 왜 자연스럽게 Beta 모양을 만드는지, 좌표 사이가 왜 양자화 관점에서 사실상 독립처럼 다뤄지는지, 그래서 왜 정규화 상수를 저장할 필요가 없어지는지를 정리한다.
 
 ## 고차원 구 위에서의 균일 분포

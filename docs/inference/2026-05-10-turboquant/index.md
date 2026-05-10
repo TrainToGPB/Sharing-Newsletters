@@ -10,6 +10,8 @@ format: abstract
 
 # TurboQuant — 학습 없는 KV 캐시·벡터 압축의 새 기준
 
+> 원본: [research.google/blog/turboquant](https://research.google/blog/turboquant-redefining-ai-efficiency-with-extreme-compression/)
+
 Google Research 가 ICLR 2026 에 발표하는 TurboQuant 는 LLM KV 캐시와 대규모 벡터 검색 인덱스를 동시에 겨냥한 양자화 알고리즘이다. 학습이나 캘리브레이션 데이터 없이 닫힌형으로 동작하면서, 보고된 벤치마크에서 KV 메모리를 6배 줄이고 H100 에서 4-bit 키 어텐션을 32-bit 대비 8배 빠르게 만든다. 이 글은 메인 블로그와 함께 묶여 발표된 세 논문 — QJL (1-bit Quantized Johnson-Lindenstrauss), PolarQuant (재귀적 극좌표 양자화), TurboQuant (2단계 합성) — 의 흐름을 한 시리즈로 정리한다.
 
 ## 핵심 포인트

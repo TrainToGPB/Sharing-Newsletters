@@ -11,6 +11,8 @@ part: 3
 
 # QJL 과 PolarQuant — 두 빌딩 블록
 
+> 원본: [research.google/blog/turboquant](https://research.google/blog/turboquant-redefining-ai-efficiency-with-extreme-compression/)
+
 TurboQuant 는 어느 날 갑자기 나온 알고리즘이 아니다. Google Research 의 같은 그룹 (Insu Han, Amir Zandieh, Vahab Mirrokni 등) 과 KAIST 공동 연구진은 2024 년부터 LLM KV 캐시 양자화를 한 단계씩 다듬어 왔다. 출발은 2024 년의 QJL (Quantized Johnson-Lindenstrauss), 그 다음이 2025 년 초의 PolarQuant, 그리고 같은 해의 TurboQuant 가 두 흐름을 합치는 정점이다. 이 편에서는 TurboQuant 직전의 두 빌딩 블록을 따로 본다. 둘 다 "랜덤 전처리 후 정규화 상수 없이 양자화한다" 는 같은 출발점에서 시작했지만, 한쪽은 차원을 줄이고 한쪽은 좌표 표현을 바꾸는 식으로 다른 길을 갔다.
 
 ## QJL — 부호 비트만 남기는 1-bit 양자화

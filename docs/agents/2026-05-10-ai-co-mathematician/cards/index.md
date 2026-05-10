@@ -11,6 +11,8 @@ seed: 1547338045
 
 # AI Co-Mathematician — 시스템 한눈에 보기
 
+> 원본: [arxiv.org/abs/2605.06651](https://arxiv.org/abs/2605.06651)
+
 논문의 핵심 그림 5장을 인포그래픽 카드로 재해석. 카드 한 장 = 정보 한 단위.
 
 ![card 1](card-1.png)

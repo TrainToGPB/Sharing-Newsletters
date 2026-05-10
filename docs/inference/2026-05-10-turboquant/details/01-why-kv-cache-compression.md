@@ -11,6 +11,8 @@ part: 1
 
 # 왜 KV 캐시 압축이 다시 화제가 됐나
 
+> 원본: [research.google/blog/turboquant](https://research.google/blog/turboquant-redefining-ai-efficiency-with-extreme-compression/)
+
 LLM 인퍼런스 비용에서 KV 캐시는 더 이상 보조 항목이 아니다. 컨텍스트가 길어지고 동시 사용자가 늘면서, 모델 가중치가 아니라 캐시가 메모리·대역폭의 1차 병목이 됐다. 이 편은 그 배경을 정리하고, 왜 기존 양자화 레시피가 KV 캐시에 그대로 통하지 않는지, 그리고 Google Research 가 이번에 묶어 발표한 TurboQuant 가 어떤 자리에 있는지 짚는다.
 
 ## KV 캐시가 병목이 된 사정

@@ -111,7 +111,8 @@ def main() -> int:
         rf"({re.escape(MARK_START)}).*?({re.escape(MARK_END)})",
         flags=re.DOTALL,
     )
-    new_text = pattern.sub(rf"\1\n{block}\n\2", text, count=1)
+    replacement = f"{MARK_START}\n{block}\n{MARK_END}"
+    new_text = pattern.sub(lambda _m: replacement, text, count=1)
     if new_text != text:
         landing.write_text(new_text, encoding="utf-8")
     print(f"refreshed versions in {landing}")

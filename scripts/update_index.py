@@ -186,7 +186,8 @@ def _replace_block(text: str, start: str, end: str, body: str) -> str:
         rf"({re.escape(start)}).*?({re.escape(end)})",
         flags=re.DOTALL,
     )
-    return pattern.sub(rf"\1\n{body}\n\2", text, count=1)
+    replacement = f"{start}\n{body}\n{end}"
+    return pattern.sub(lambda _m: replacement, text, count=1)
 
 
 def main() -> int:

@@ -7,6 +7,9 @@ Scans docs/ for post landings, sorts by date descending, then:
 2. If <!-- CARDS_START --> / <!-- CARDS_END --> markers also exist, rewrites that
    block with a Material grid-cards gallery of recent posts that have a
    cards/ subfolder. Skipped silently if the markers aren't present.
+3. For each topic landing page (docs/<topic>/index.md) that contains
+   <!-- TOPIC_POSTS_START --> / <!-- TOPIC_POSTS_END -->, rewrites that block
+   with a date-descending table of posts in that topic.
 
 Run from repo root:  python scripts/update_index.py
 """
@@ -32,11 +35,14 @@ LATEST_START = "<!-- LATEST_START -->"
 LATEST_END = "<!-- LATEST_END -->"
 CARDS_START = "<!-- CARDS_START -->"
 CARDS_END = "<!-- CARDS_END -->"
+TOPIC_POSTS_START = "<!-- TOPIC_POSTS_START -->"
+TOPIC_POSTS_END = "<!-- TOPIC_POSTS_END -->"
 
 LIMIT = 10
 LIMIT_CARDS = 6
 EMPTY_TEXT = "아직 글이 없다. `/share-news <URL>` 으로 첫 글을 추가해보자."
 EMPTY_CARDS_TEXT = "아직 카드 뉴스가 없다. `/card-news <source>` 로 첫 카드를 만들어보자."
+EMPTY_TOPIC_TEXT = "아직 이 토픽에 글이 없다."
 
 
 def post_url(rel: Path) -> str:
@@ -79,6 +85,7 @@ def collect_posts() -> list[dict]:
         cards_index = post_dir / "cards" / "index.md"
         card_thumb = post_dir / "cards" / "card-1.png"
         has_cards = cards_index.is_file() and card_thumb.is_file()
+        topic = rel.parts[0] if rel.parts else ""
         posts.append({
             "title": meta.get("title", p.stem),
             "date": str(meta["date"]),
@@ -86,6 +93,7 @@ def collect_posts() -> list[dict]:
             "summary": meta.get("summary", ""),
             "tags": meta.get("tags") or [],
             "url": post_url(rel),
+            "topic": topic,
             "has_cards": has_cards,
         })
     posts.sort(key=lambda x: x["date"], reverse=True)
@@ -136,6 +144,43 @@ def render_cards(posts: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def render_topic_table(posts: list[dict]) -> str:
+    if not posts:
+        return EMPTY_TOPIC_TEXT
+    lines = [
+        "| 날짜 | 제목 | 요약 |",
+        "| --- | --- | --- |",
+    ]
+    for p in posts:
+        rel_url = p["url"]
+        prefix = f"{p['topic']}/"
+        if rel_url.startswith(prefix):
+            rel_url = rel_url[len(prefix):]
+        title = p["title"].replace("|", "\\|")
+        summary = (p.get("summary") or "").replace("|", "\\|").replace("\n", " ")
+        lines.append(f"| {p['date']} | [{title}]({rel_url}) | {summary} |")
+    return "\n".join(lines)
+
+
+def update_topic_landings(posts: list[dict]) -> int:
+    updated = 0
+    for topic_dir in sorted(p for p in DOCS.iterdir() if p.is_dir()):
+        landing = topic_dir / "index.md"
+        if not landing.is_file():
+            continue
+        text = landing.read_text(encoding="utf-8")
+        if TOPIC_POSTS_START not in text or TOPIC_POSTS_END not in text:
+            continue
+        topic = topic_dir.name
+        topic_posts = [p for p in posts if p.get("topic") == topic]
+        body = render_topic_table(topic_posts)
+        new_text = _replace_block(text, TOPIC_POSTS_START, TOPIC_POSTS_END, body)
+        if new_text != text:
+            landing.write_text(new_text, encoding="utf-8")
+            updated += 1
+    return updated
+
+
 def _replace_block(text: str, start: str, end: str, body: str) -> str:
     pattern = re.compile(
         rf"({re.escape(start)}).*?({re.escape(end)})",
@@ -165,7 +210,11 @@ def main() -> int:
 
     if new_text != text:
         INDEX.write_text(new_text, encoding="utf-8")
-    print(f"updated {INDEX} with {min(len(posts), LIMIT)} posts{cards_msg}")
+    topic_updated = update_topic_landings(posts)
+    print(
+        f"updated {INDEX} with {min(len(posts), LIMIT)} posts{cards_msg}; "
+        f"refreshed {topic_updated} topic landing(s)"
+    )
     return 0
 
 

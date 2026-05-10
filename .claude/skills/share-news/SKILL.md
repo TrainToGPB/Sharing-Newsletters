@@ -118,12 +118,14 @@ URL/PDF 같은 명령. URL 은 trafilatura 로 본문 + 인라인 이미지 자�
 - frontmatter (필수): title, date, author, tags, source, summary, format=details, part=<N>
 - title 에 글 전체 제목 prefix 안 붙음, 번호도 안 붙음.
 - 본문 H1 = title 그대로.
+- **H1 바로 아래 빈 줄 하나, 그 다음 줄에 원본 출처 링크 배지**: `> 원본: [<도메인 또는 짧은 라벨>](<URL>)`. 그 다음 빈 줄, 본문 시작. 라벨 예: `arxiv.org/abs/2605.06651`, `Google Research blog`.
 - 헤더로 토픽 분리 + 짧은 단락 (2~4문장) + 병렬 항목은 불릿/표.
 - 칼럼식 긴 산문 나열 X. 사실 밀도 우선.
 - 그림 ref: ../assets/fig-N.png. 캡션은 마크다운 italic 한 줄.
+- **수식은 마크다운 수식 포맷 필수**. 인라인 `$x = y$`, 디스플레이 `$$ ... $$` (앞뒤 빈 줄). 변수·기호 한 글자도 `$x$` 로 감싼다. raw `\frac` `\sum` `\mathcal` 등을 일반 텍스트에 흘리지 말 것.
 - 편집자 부연은 짧게만 — 원문이 빠뜨린 맥락·실무 메모 정도. 사변·단정 X.
 - 본문 끝에 다음 편 링크 한 줄 (있으면).
-- ## 출처 섹션에 source URL.
+- ## 출처 섹션에 source URL (상단 배지와 별도로 그대로 유지).
 
 출력하지 말 것: 작업 진행 보고. 파일 작성 후 한 줄 ("written: <path>, ~<words> words") 만 반환.
 ```
@@ -150,6 +152,8 @@ format: abstract
 ---
 
 # <글 전체 제목>
+
+> 원본: [<도메인 또는 짧은 라벨>](<원본 URL>)
 
 <도입 한 문장 — 한 줄 요약 풀어쓴 것>
 
@@ -182,7 +186,7 @@ python scripts/refresh_landing.py docs/<topic>/<YYYY-MM-DD>-<slug>/
 python scripts/update_index.py
 ```
 
-순서대로 — 슬러그 랜딩의 VERSIONS 블록을 details 파트 + (있으면) cards 링크로 채우고, 홈 인덱스 LATEST 블록을 갱신.
+순서대로 — 슬러그 랜딩의 VERSIONS 블록을 details 파트 + (있으면) cards 링크로 채우고, 홈 인덱스 LATEST 블록과 토픽 랜딩 (`docs/<topic>/index.md`) 의 `<!-- TOPIC_POSTS_START -->` / `<!-- TOPIC_POSTS_END -->` 블록 (날짜·제목·요약 표) 을 함께 갱신. 토픽 랜딩에 마커가 없으면 그 토픽만 건너뜀 — 새 토픽 폴더를 만들 때 마커를 함께 박아두는 것을 잊지 말 것.
 
 ### 9. 마무리
 
@@ -199,7 +203,7 @@ python scripts/update_index.py
 
 토픽 폴더 구조는 자주 바뀐다. 사용자가 새 토픽을 추가하거나 기존 토픽을 제거할 때, **반드시** 다음을 함께 갱신한다.
 
-- `docs/<new-topic>/index.md` 생성 (한 줄 설명) 또는 `docs/<old-topic>/` 디렉토리 제거
+- `docs/<new-topic>/index.md` 생성 (한 줄 설명 + `## 글 목록` 섹션 안에 `<!-- TOPIC_POSTS_START -->` / `<!-- TOPIC_POSTS_END -->` 마커) 또는 `docs/<old-topic>/` 디렉토리 제거
 - `docs/index.md` 의 "토픽" 섹션 리스트
 - `README.md` 의 폴더 구조 섹션
 - `CLAUDE.md` 의 토픽 관련 언급 (있다면)

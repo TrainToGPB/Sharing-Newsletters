@@ -45,6 +45,7 @@ plugins:
         - ko
         - en
   - tags
+  - awesome-pages
 
 markdown_extensions:
   - admonition

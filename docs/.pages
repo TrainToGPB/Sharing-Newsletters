@@ -1,0 +1,9 @@
+nav:
+  - index.md
+  - agents
+  - models
+  - training
+  - inference
+  - benchmark
+  - tools
+  - digest

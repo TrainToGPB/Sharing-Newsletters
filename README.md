@@ -96,7 +96,6 @@ docs/
   training/          사전·사후학습, 파인튜닝, 데이터
   inference/         서빙·양자화 등 추론 최적화
   benchmark/         평가, 리더보드, 비교
-  infra/             클러스터, MLOps, 비용
   tools/             개발 도구, IDE, CLI
   digest/            주간·월간 모음
 .claude/skills/share-news/  자동 정리 스킬

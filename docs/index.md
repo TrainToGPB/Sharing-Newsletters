@@ -25,6 +25,7 @@ push 한 번으로 글이 올라가고, 정리는 Claude Code 가 도와준다. 
 ## 최신 글
 
 <!-- LATEST_START -->
+- **2026-05-18** [SlimQwen — Qwen3-Next-80A3B 를 23A2B 로 줄이는 MoE 가지치기·증류 레시피](training/2026-05-18-slimqwen-moe-compression/) · _TrainToGPB_ — 사전학습 스케일에서 MoE 모델을 압축할 때 (1) 가지치기 = 강한 초기화, (2) 부분 보존 전문가 머징, (3) MTP KD 가 포함된 4-term 손실, (4) 점진적 가지치기 스케줄이 일관되게 더 좋다. Qwen3-Next-80A3B 를 23A2B 로 약 3.4x 압축한 SlimQwen 으로 검증된 레시피. `MoE` `pruning` `distillation` `MTP` `compression` `pretraining`
 - **2026-05-16** [강화학습으로 LLM 의 잠재 추론을 깨우는 HRPO](training/2026-05-16-hybrid-latent-reasoning-rl/) · _TrainToGPB_ — 이산 토큰과 hidden state 를 학습 가능한 게이트로 섞고, CoT 트레이스 없이 outcome 보상만으로 잠재 추론을 RL 학습하는 HRPO 가 1.5B·3B Qwen 으로 7B 베이스라인급 성능을 낸다. `강화학습` `추론` `latent-reasoning` `HRPO` `GRPO`
 - **2026-05-16** [RecursiveMAS — 멀티 에이전트 협업을 잠재 공간에서 재귀로 스케일링](agents/2026-05-16-recursive-mas/) · _TrainToGPB_ — 다중 에이전트 시스템을 텍스트로 주고받지 않고 잠재 표현 그대로 묶어 하나의 재귀 계산으로 본다. 평균 정확도 +8.3%p, 추론 1.2~2.4배 가속, 토큰 34.6~75.6% 절감. `에이전트` `멀티에이전트` `재귀` `latent-reasoning` `scaling-law`
 - **2026-05-13** [On-Policy Distillation — 학생 궤적의 매 토큰을 교사가 채점하는 사후학습](training/2026-05-13-on-policy-distillation/) · _TrainToGPB_ — 학생 모델의 rollout 을 sampling 하고 교사 모델이 매 토큰의 reverse KL 로 채점하는 on-policy distillation 은 AIME'24 74.4% 를 RL 의 1/10 비용 (1,800 vs 17,920 GPU hr) 으로 재현하고, 사내 어시스턴트 시나리오에서 IF-eval 을 45% → 83% 로 복원하면서 knowledge 도 유지한다. RL 대비 7~10배 빠른 수렴, 누적 50~100배 compute 절감. `사후학습` `증류` `RL` `on-policy` `효율화`

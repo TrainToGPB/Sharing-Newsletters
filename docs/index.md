@@ -25,6 +25,7 @@ push 한 번으로 글이 올라가고, 정리는 Claude Code 가 도와준다. 
 ## 최신 글
 
 <!-- LATEST_START -->
+- **2026-06-04** [Gemma 4 12B — encoder-free 멀티모달 모델의 구조](models/2026-06-04-visual-guide-gemma-4-12b/) · _김세형_ — Gemma 4 12B는 vision/audio encoder를 가벼운 embedding-projection 경로로 바꾸고, 이미지와 오디오 이해 부담을 LLM 본체로 넘겨 latency와 파이프라인 복잡도를 줄인다. `gemma-4` `multimodal-llm` `encoder-free` `vision-language-model` `audio-language-model`
 - **2026-05-21** [ELF — 임베딩 공간에 머무는 연속 확산 언어 모델](models/2026-05-21-elf-embedded-language-flows/) · _TrainToGPB_ — ELF는 Flow Matching을 frozen T5 임베딩 공간 위에 올리고, $x_1$-prediction과 weight-shared 디코딩으로 마지막 step에서만 token화한다. 105M 모델이 32 step만에 Gen PPL 24, 45B 학습 토큰으로 500B+ 학습한 디스크리트·연속 DLM을 앞선다. `diffusion-language-model` `flow-matching` `continuous-dlm` `generative-model` `elf`
 - **2026-05-18** [SlimQwen — Qwen3-Next-80A3B 를 23A2B 로 줄이는 MoE 가지치기·증류 레시피](training/2026-05-18-slimqwen-moe-compression/) · _TrainToGPB_ — 사전학습 스케일에서 MoE 모델을 압축할 때 (1) 가지치기 = 강한 초기화, (2) 부분 보존 전문가 머징, (3) MTP KD 가 포함된 4-term 손실, (4) 점진적 가지치기 스케줄이 일관되게 더 좋다. Qwen3-Next-80A3B 를 23A2B 로 약 3.4x 압축한 SlimQwen 으로 검증된 레시피. `MoE` `pruning` `distillation` `MTP` `compression` `pretraining`
 - **2026-05-16** [강화학습으로 LLM 의 잠재 추론을 깨우는 HRPO](training/2026-05-16-hybrid-latent-reasoning-rl/) · _TrainToGPB_ — 이산 토큰과 hidden state 를 학습 가능한 게이트로 섞고, CoT 트레이스 없이 outcome 보상만으로 잠재 추론을 RL 학습하는 HRPO 가 1.5B·3B Qwen 으로 7B 베이스라인급 성능을 낸다. `강화학습` `추론` `latent-reasoning` `HRPO` `GRPO`
@@ -34,7 +35,6 @@ push 한 번으로 글이 올라가고, 정리는 Claude Code 가 도와준다. 
 - **2026-05-11** [Natural Language Autoencoders — 모델 활성값을 자연어로 비지도 설명하기](models/2026-05-11-nla-natural-language-autoencoders/) · _TrainToGPB_ — 활성값을 자연어로 압축했다가 다시 복원하는 자동인코더(NLA)를 RL로 학습해 모델 내부 상태를 사람이 직접 읽을 수 있게 만든다. Opus 4.6 사전 배포 감사에서 unverbalized evaluation awareness를 표면화하고, 의도적으로 misalign된 모델을 학습 데이터 접근 없이 감사하는 데 성공했다. `interpretability` `nla` `anthropic` `mechanistic-interpretability` `auditing` `alignment`
 - **2026-05-10** [RL 은 LLM 에게 긴 호흡 추론을 가르칠 수 있을까 — ScaleLogic 으로 본 표현력의 힘](training/2026-05-10-rl-long-horizon-scalelogic/) · _TrainToGPB_ — 깊이와 논리 표현력을 독립적으로 통제하는 합성 환경 ScaleLogic 위에서 RL 학습 비용은 깊이에 대해 깨끗한 power-law 를 그리며, 그 지수는 표현력이 풍부할수록 단조 증가한다 ($\gamma$ 1.04 → 2.60). 다운스트림 전이 역시 *얼마나* 학습했는지보다 *무엇을* 학습했는지에 더 의존하며, 가장 표현력 있는 환경은 8개 추론 벤치마크 평균을 최대 +10.66 점 끌어올린다. `RL` `추론` `사후학습` `합성데이터` `스케일링`
 - **2026-05-10** [AI Co-Mathematician — 수학자와 비동기로 협업하는 에이전트 워크벤치](agents/2026-05-10-ai-co-mathematician/) · _TrainToGPB_ — 수학자가 옆에 앉아 가설을 주고받는 비동기·상태 보존 에이전트 워크벤치. FrontierMath Tier 4에서 48%로 새 SOTA, 내부 100문항 벤치마크에서 Gemini Deep Think 대비 +17%p. `agents` `math` `frontiermath` `multi-agent`
-- **2026-05-10** [TurboQuant — 학습 없는 KV 캐시·벡터 압축의 새 기준](inference/2026-05-10-turboquant/) · _Claude_ — 랜덤 회전으로 좌표 분포를 알려진 모양으로 만들고, MSE 양자화에 1-bit QJL 잔차 보정을 더해 KV 캐시를 6배 압축하면서 정확도 손실 없이 H100 에서 키 어텐션을 8배 가속하는 학습·데이터 비의존 양자화 (Google Research, ICLR 2026). `inference` `quantization` `kv-cache` `vector-search` `turboquant` `qjl` `polarquant`
 <!-- LATEST_END -->
 
 ## 토픽

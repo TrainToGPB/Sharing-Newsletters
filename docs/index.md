@@ -25,6 +25,7 @@ push 한 번으로 글이 올라가고, 정리는 Claude Code 가 도와준다. 
 ## 최신 글
 
 <!-- LATEST_START -->
+- **2026-06-10** [MAI-Thinking-1: Microsoft의 reasoning model을 만든 hill-climbing machine](models/2026-06-10-mai-thinking-1/) · _김세형_ — MAI-Thinking-1은 35B active / 약 1T total MoE reasoning model이지만, 보고서의 핵심은 모델 자체보다 pre-training, RL, 평가, 인프라를 빠르게 반복하는 hill-climbing machine이다. `mai-thinking-1` `microsoft-ai` `reasoning-model` `reinforcement-learning` `moe`
 - **2026-06-05** [On the Scaling of PEFT — 백만 개 개인 모델을 위한 LoRA 스케일링](training/2026-06-05-scaling-peft-personal-models/) · _김세형_ — PEFT를 단순한 저비용 fine-tuning이 아니라 강한 공유 base 위에 얹히는 지속적 local adaptive state로 보고, Scale Up·Scale Down·Scale Out 세 축이 함께 맞물려야 백만 개 개인 모델이 가능하다고 주장한다. `PEFT` `LoRA` `personalization` `fine-tuning` `serving`
 - **2026-06-05** [AI는 AI 개발을 얼마나 가속하고 있는가](agents/2026-06-05-recursive-self-improvement/) · _김세형_ — Anthropic은 외부 벤치마크와 내부 개발 데이터를 근거로 AI가 이미 AI 개발을 가속하고 있으며, 병목이 실행에서 연구 판단과 사회적 조율로 이동하고 있다고 주장한다. `agents` `recursive-self-improvement` `ai-research` `anthropic`
 - **2026-06-04** [Gemma 4 12B — encoder-free 멀티모달 모델의 구조](models/2026-06-04-visual-guide-gemma-4-12b/) · _김세형_ — Gemma 4 12B는 vision/audio encoder를 가벼운 embedding-projection 경로로 바꾸고, 이미지와 오디오 이해 부담을 LLM 본체로 넘겨 latency와 파이프라인 복잡도를 줄인다. `gemma-4` `multimodal-llm` `encoder-free` `vision-language-model` `audio-language-model`
@@ -34,7 +35,6 @@ push 한 번으로 글이 올라가고, 정리는 Claude Code 가 도와준다. 
 - **2026-05-16** [RecursiveMAS — 멀티 에이전트 협업을 잠재 공간에서 재귀로 스케일링](agents/2026-05-16-recursive-mas/) · _TrainToGPB_ — 다중 에이전트 시스템을 텍스트로 주고받지 않고 잠재 표현 그대로 묶어 하나의 재귀 계산으로 본다. 평균 정확도 +8.3%p, 추론 1.2~2.4배 가속, 토큰 34.6~75.6% 절감. `에이전트` `멀티에이전트` `재귀` `latent-reasoning` `scaling-law`
 - **2026-05-13** [On-Policy Distillation — 학생 궤적의 매 토큰을 교사가 채점하는 사후학습](training/2026-05-13-on-policy-distillation/) · _TrainToGPB_ — 학생 모델의 rollout 을 sampling 하고 교사 모델이 매 토큰의 reverse KL 로 채점하는 on-policy distillation 은 AIME'24 74.4% 를 RL 의 1/10 비용 (1,800 vs 17,920 GPU hr) 으로 재현하고, 사내 어시스턴트 시나리오에서 IF-eval 을 45% → 83% 로 복원하면서 knowledge 도 유지한다. RL 대비 7~10배 빠른 수렴, 누적 50~100배 compute 절감. `사후학습` `증류` `RL` `on-policy` `효율화`
 - **2026-05-11** [Rethinking On-Policy Distillation — 학생과 교사 사이의 숨은 동역학](training/2026-05-11-rethinking-on-policy-distillation/) · _Claude_ — 같은 OPD 셋업이 왜 어떤 날은 되고 어떤 날은 안 되는지 phenomenology · mechanism · recipe 세 층으로 분해. 성공 run 은 token overlap 이 72→91% 로 오르며 shared top-k 가 결합 확률 질량의 97-99% 를 차지하고, 같은 family 1.5B 와 7B 교사는 학생 관점에서 분포적으로 구별되지 않는다. cold start SFT + teacher-aligned prompt selection 으로 실패 run 을 성공 dynamic 으로 되돌릴 수 있다. `distillation` `post-training` `on-policy` `rl` `sft`
-- **2026-05-11** [Natural Language Autoencoders — 모델 활성값을 자연어로 비지도 설명하기](models/2026-05-11-nla-natural-language-autoencoders/) · _TrainToGPB_ — 활성값을 자연어로 압축했다가 다시 복원하는 자동인코더(NLA)를 RL로 학습해 모델 내부 상태를 사람이 직접 읽을 수 있게 만든다. Opus 4.6 사전 배포 감사에서 unverbalized evaluation awareness를 표면화하고, 의도적으로 misalign된 모델을 학습 데이터 접근 없이 감사하는 데 성공했다. `interpretability` `nla` `anthropic` `mechanistic-interpretability` `auditing` `alignment`
 <!-- LATEST_END -->
 
 ## 토픽

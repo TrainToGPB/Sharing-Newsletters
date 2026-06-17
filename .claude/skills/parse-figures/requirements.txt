@@ -1,0 +1,3 @@
+# parse-figures — deps for grid_render.py + refine_boxes.py + crop_figures.py
+PyMuPDF>=1.24    # PDF text scan + rasterization + geometry/caption for refine_boxes
+Pillow>=10.0     # grid overlay drawing + cropping

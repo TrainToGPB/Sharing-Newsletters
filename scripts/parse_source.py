@@ -15,9 +15,14 @@ Options:
 Source types:
     - http(s) URL  -> fetched, cleaned with trafilatura. Inline images get
                       downloaded to assets-dir when given.
-                      arxiv.org/abs/<id> is rewritten to arxiv.org/html/<id>.
+                      arxiv.org/abs|pdf|html/<id>: the HTML version is probed
+                      first and used if it exists; otherwise it falls back to
+                      downloading the PDF and parsing that.
     - .pdf         -> Docling for text. PyMuPDF for image extraction.
                       Extracted figures listed in a "## Figures" block at end.
+
+Downloaded/extracted images with transparency are flattened onto a white
+background (dark-mode friendly).
 
 Other file types (.md, .txt) are intentionally not supported. Paste their
 content into a post manually if you need to.
@@ -62,6 +67,57 @@ def rewrite_arxiv(url: str) -> str:
     return url
 
 
+def arxiv_id(url: str) -> "str | None":
+    """Return the arXiv id for an abs/pdf/html arXiv URL, else None."""
+    m = re.match(
+        r"https?://arxiv\.org/(?:abs|pdf|html)/([\w.\-/]+?)(?:\.pdf)?/?$", url
+    )
+    return m.group(1) if m else None
+
+
+def _http_ok(url: str) -> bool:
+    """True if `url` responds 200 (HEAD, falling back to GET on 405)."""
+    import httpx
+
+    headers = {"User-Agent": "Mozilla/5.0 SharingNewsletters/1.0"}
+    try:
+        r = httpx.head(url, follow_redirects=True, timeout=15.0, headers=headers)
+        if r.status_code == 405:  # some servers reject HEAD
+            r = httpx.get(url, follow_redirects=True, timeout=20.0, headers=headers)
+        return r.status_code == 200
+    except Exception:
+        return False
+
+
+def _flatten_to_white(path: Path) -> None:
+    """Composite a transparent image onto a white background, in place.
+
+    arXiv diagrams are often transparent PNGs that render on black in dark mode.
+    No-op when Pillow is missing, the image is opaque, or the format (e.g. SVG)
+    can't be opened by Pillow.
+    """
+    try:
+        from PIL import Image
+    except ImportError:
+        return
+    try:
+        im = Image.open(path)
+    except Exception:
+        return
+    has_alpha = im.mode in ("RGBA", "LA") or (
+        im.mode == "P" and "transparency" in im.info
+    )
+    if not has_alpha:
+        return
+    try:
+        rgba = im.convert("RGBA")
+        bg = Image.new("RGBA", rgba.size, (255, 255, 255, 255))
+        bg.alpha_composite(rgba)
+        bg.convert("RGB").save(path)
+    except Exception as exc:
+        print(f"white-bg flatten failed: {path}: {exc}", file=sys.stderr)
+
+
 def _download_inline_images(
     md: str,
     base_url: str,
@@ -98,6 +154,7 @@ def _download_inline_images(
             counter["i"] += 1
             fname = f"fig-{counter['i']}{ext}"
             (assets_dir / fname).write_bytes(r.content)
+            _flatten_to_white(assets_dir / fname)
             href = f"{image_prefix.rstrip('/')}/{fname}" if image_prefix else fname
         except Exception as exc:
             print(f"image fetch failed: {url}: {exc}", file=sys.stderr)
@@ -184,6 +241,7 @@ def extract_pdf_figures(path: Path, assets_dir: Path, image_prefix: str) -> list
                     fig_count += 1
                     fname = f"fig-{fig_count}.png"
                     pix.save(str(assets_dir / fname))
+                    _flatten_to_white(assets_dir / fname)
                     href = f"{image_prefix.rstrip('/')}/{fname}" if image_prefix else fname
                     refs.append(f"![figure {fig_count}]({href})")
                 finally:
@@ -203,6 +261,24 @@ def parse_pdf(path: Path, assets_dir: Path | None, image_prefix: str) -> str:
     return body.rstrip() + "\n\n## Figures\n\n" + "\n\n".join(figs) + "\n"
 
 
+def parse_pdf_url(pdf_url: str, assets_dir: Path | None, image_prefix: str) -> str:
+    """Download a remote PDF to a temp file and parse it like a local PDF."""
+    import tempfile
+
+    import httpx
+
+    headers = {"User-Agent": "Mozilla/5.0 SharingNewsletters/1.0"}
+    r = httpx.get(pdf_url, follow_redirects=True, timeout=60.0, headers=headers)
+    r.raise_for_status()
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as f:
+        f.write(r.content)
+        tmp = Path(f.name)
+    try:
+        return parse_pdf(tmp, assets_dir, image_prefix)
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("source")
@@ -218,7 +294,23 @@ def main() -> int:
 
     src = args.source
     if is_url(src):
-        md = parse_url(src, assets_dir=args.assets_dir, image_prefix=image_prefix)
+        aid = arxiv_id(src)
+        if aid is not None:
+            html_url = f"https://arxiv.org/html/{aid}"
+            if _http_ok(html_url):
+                print(f"arxiv: using HTML version {html_url}", file=sys.stderr)
+                md = parse_url(
+                    html_url, assets_dir=args.assets_dir, image_prefix=image_prefix
+                )
+            else:
+                pdf_url = f"https://arxiv.org/pdf/{aid}"
+                print(
+                    f"arxiv: no HTML page, falling back to PDF {pdf_url}",
+                    file=sys.stderr,
+                )
+                md = parse_pdf_url(pdf_url, args.assets_dir, image_prefix)
+        else:
+            md = parse_url(src, assets_dir=args.assets_dir, image_prefix=image_prefix)
     else:
         p = Path(src).expanduser().resolve()
         if not p.exists():

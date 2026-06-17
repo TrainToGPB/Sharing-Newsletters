@@ -1,0 +1,23 @@
+{
+  "skill_name": "parse-figures",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "papers/2103-00020-clip/clip.pdf 에서 그림이랑 표 좀 깔끔하게 잘라줘. 특히 첫 페이지 아키텍처 다이어그램(Figure 1)이 중요해.",
+      "expected_output": "figure-1.png (벡터 아키텍처, 헤더 없이; 캡션 글자는 크롭에서 제외되고 manifest의 caption에 텍스트로), 주요 figure/table 크롭 + manifest.json. PDF 텍스트 레이어에서 온 정확한 캡션, 표는 환각 없는 markdown.",
+      "files": ["papers/2103-00020-clip/clip.pdf"]
+    },
+    {
+      "id": 2,
+      "prompt": "이 SigLIP 논문(papers/2303-15343-siglip/siglip.pdf)에서 본문 figure만 뽑아줘. 부록 표는 빼고.",
+      "expected_output": "본문 페이지의 figure 크롭만 (부록 제외). 컬럼 너비/범례/축 라벨 안 잘림.",
+      "files": ["papers/2303-15343-siglip/siglip.pdf"]
+    },
+    {
+      "id": 3,
+      "prompt": "pymupdf로 이 논문 그림 뽑으니까 벡터 다이어그램이 통째로 안 나오고 표도 못 잡던데, 좀 제대로 분리해줄 수 있어? papers/2103-00020-clip/clip.pdf",
+      "expected_output": "get_images() 한계를 우회 — 벡터 아키텍처 도식과 표가 렌더+크롭으로 정상 추출됨.",
+      "files": ["papers/2103-00020-clip/clip.pdf"]
+    }
+  ]
+}

@@ -36,7 +36,7 @@ docs/<topic>/<YYYY-MM-DD>-<slug>/
 
 ### 1. 입력 검증
 
-- URL 이면 스킴 확인. `arxiv.org/abs/<id>` 또는 `arxiv.org/pdf/<id>` 는 `parse_source.py` 가 `arxiv.org/html/<id>` 로 자동 치환.
+- URL 이면 스킴 확인. arXiv(`abs`/`pdf`/`html`)는 `parse_source.py` 가 **HTML 버전을 먼저 확인**(HEAD)해 있으면 HTML을 파싱하고, 없으면 **PDF를 받아 파싱**한다(예전엔 무조건 `html` 로 치환만 했음).
 - 파일 경로면 `.pdf` 인지 확인. 다른 확장자는 거절.
 
 ### 2. 메타 빠른 결정
@@ -58,7 +58,9 @@ python scripts/parse_source.py <source> \
     --image-prefix assets
 ```
 
-URL/PDF 같은 명령. URL 은 trafilatura 로 본문 + 인라인 이미지 자동 다운로드, PDF 는 Docling 텍스트 + PyMuPDF 그림.
+URL/PDF 같은 명령. URL 은 trafilatura 로 본문 + 인라인 이미지 자동 다운로드, PDF 는 Docling 텍스트 + PyMuPDF 그림. 투명 배경 이미지(arXiv 다이어그램에 흔함)는 흰 배경으로 flatten 해 저장 — 다크모드에서 글자/선이 안 보이는 문제 방지.
+
+> PDF에서 **벡터 다이어그램·표를 라벨 단위로 깨끗이** 뽑고 싶으면 `/parse-figures` 스킬을 쓴다(`--out-dir <assets>`). PyMuPDF 덤프가 놓치는 벡터 아키텍처 도식과 표를 잡고, 파일명을 논문 실제 라벨(`figure-3.png`)로 떨구며, 캡션 글자를 크롭에서 빼고 `manifest.json` 에 캡션 텍스트를 따로 담는다.
 
 ### 4. 그림 검토 (간단히)
 
@@ -121,7 +123,12 @@ URL/PDF 같은 명령. URL 은 trafilatura 로 본문 + 인라인 이미지 자�
 - **H1 바로 아래 빈 줄 하나, 그 다음 줄에 원본 출처 링크 배지**: `> 원본: [<도메인 또는 짧은 라벨>](<URL>)`. 그 다음 빈 줄, 본문 시작. 라벨 예: `arxiv.org/abs/2605.06651`, `Google Research blog`.
 - 헤더로 토픽 분리 + 짧은 단락 (2~4문장) + 병렬 항목은 불릿/표.
 - 칼럼식 긴 산문 나열 X. 사실 밀도 우선.
-- 그림 ref: ../assets/fig-N.png. 캡션은 마크다운 italic 한 줄.
+- 그림 ref: `../assets/fig-N.png`. **캡션은 그림과 빈 줄(이중 개행)로 분리** — `![](...)` 다음에 빈 줄을 한 줄 넣고 그 아래에 *이탤릭 한 줄 캡션*. 한 칸 줄바꿈만 하면 마크다운 프리뷰에서 캡션이 그림 옆에 붙어 렌더된다. 올바른 형식:
+  ```markdown
+  ![](../assets/fig-N.png)
+
+  *캡션 — 무엇을/왜 중요한지.*
+  ```
 - **수식은 마크다운 수식 포맷 필수**. 인라인 `$x = y$`, 디스플레이 `$$ ... $$` (앞뒤 빈 줄). 변수·기호 한 글자도 `$x$` 로 감싼다. raw `\frac` `\sum` `\mathcal` 등을 일반 텍스트에 흘리지 말 것.
 - 편집자 부연은 짧게만 — 원문이 빠뜨린 맥락·실무 메모 정도. 사변·단정 X.
 - 본문 끝에 다음 편 링크 한 줄 (있으면).
@@ -165,7 +172,7 @@ format: abstract
 
 ## 한 페이지 요약
 
-<짧은 본문, 600~1000 단어. 이 글이 다루는 흐름과 결과를 한 호흡으로. 0~2 그림. assets/fig-N.png ref 사용 (이 페이지는 slug-루트라 ../ 없이 바로).>
+<짧은 본문, 600~1000 단어. 이 글이 다루는 흐름과 결과를 한 호흡으로. 0~2 그림. `assets/fig-N.png` ref 사용 (이 페이지는 slug-루트라 `../` 없이 바로). 캡션을 달면 그림과 **빈 줄(이중 개행)로 분리** — `![](...)` 다음 빈 줄, 그 아래 *이탤릭 캡션*.>
 
 ## 자세히 보기
 
